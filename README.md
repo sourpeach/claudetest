@@ -2,7 +2,7 @@
 
 A clean, drag-and-drop task manager based on **Habit 3: Put First Things First** from Stephen Covey's *7 Habits of Highly Effective People*.
 
-![Priority Matrix App](https://sourpeach.github.io/claudetest/)
+**[Open the app](https://sourpeach.github.io/claudetest/)**
 
 ## What is the Priority Matrix?
 
@@ -29,9 +29,7 @@ Covey's Time Management Matrix divides tasks into four quadrants based on urgenc
 No install, no login, no server required. Just open the file:
 
 **Option 1 — GitHub Pages (online):**
-```
-https://sourpeach.github.io/claudetest/
-```
+[https://sourpeach.github.io/claudetest/](https://sourpeach.github.io/claudetest/)
 
 **Option 2 — Run locally:**
 ```bash
