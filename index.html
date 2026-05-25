@@ -354,6 +354,49 @@
       color: var(--faint);
     }
 
+    /* ── Export / Import ── */
+    .data-card .card-head { border-bottom: none; padding-bottom: 0; }
+    .data-btns { display: flex; flex-direction: column; gap: 7px; padding: 10px 12px 12px; }
+
+    .btn-export, .btn-import {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 9px;
+      font: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background .15s, color .15s, transform .1s;
+    }
+    .btn-export:active, .btn-import:active { transform: scale(.97); }
+
+    .btn-export {
+      background: #f1f5f9;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-export:hover { background: #e2e8f0; color: var(--text); }
+
+    .btn-import {
+      background: #f1f5f9;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-import:hover { background: #e2e8f0; color: var(--text); }
+
+    #import-input { display: none; }
+
+    .import-err {
+      font-size: 0.72rem;
+      color: var(--q1);
+      text-align: center;
+      min-height: 1em;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 780px) {
       .layout { grid-template-columns: 1fr; }
@@ -393,6 +436,16 @@
         ondragleave="dragLeave(event)"
         ondrop="drop(event,'inbox')">
         <p class="drop-hint" id="inbox-hint">Add tasks above &mdash; then drag them into a quadrant</p>
+      </div>
+    </div>
+
+    <div class="card data-card">
+      <div class="card-head"><h3>Data</h3></div>
+      <div class="data-btns">
+        <button class="btn-export" id="btn-export">↓ Export tasks (.json)</button>
+        <button class="btn-import" id="btn-import">↑ Import tasks (.json)</button>
+        <input type="file" id="import-input" accept=".json,application/json" />
+        <p class="import-err" id="import-err"></p>
       </div>
     </div>
 
@@ -643,6 +696,72 @@
   }
 
   load();
+
+  /* ── Export ── */
+  function exportTasks() {
+    const data = {};
+    ZONES.forEach(id => {
+      data[id] = Array.from(zone(id).querySelectorAll('.task')).map(c => ({
+        id:        parseInt(c.dataset.id, 10),
+        text:      c.querySelector('.task-text').textContent,
+        completed: c.classList.contains('completed'),
+      }));
+    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10);
+    a.href     = url;
+    a.download = `priority-matrix-${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /* ── Import ── */
+  function importTasks(file) {
+    const errEl = document.getElementById('import-err');
+    errEl.textContent = '';
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        // validate top-level keys
+        const valid = ZONES.every(id => !data[id] || Array.isArray(data[id]));
+        if (!valid) throw new Error('Unexpected format');
+        // clear all zones
+        ZONES.forEach(id => {
+          Array.from(zone(id).querySelectorAll('.task')).forEach(c => c.remove());
+        });
+        let maxId = 0;
+        ZONES.forEach(id => {
+          (data[id] || []).forEach(t => {
+            if (!t.text) return;
+            const card = makeCard(t.text, t.id || ++taskIdSeq);
+            if (t.completed) card.classList.add('completed');
+            zone(id).appendChild(card);
+            if ((t.id || 0) > maxId) maxId = t.id;
+          });
+        });
+        taskIdSeq = Math.max(taskIdSeq, maxId);
+        sync();
+      } catch (_) {
+        errEl.textContent = 'Could not read file — make sure it\'s a valid export.';
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  document.getElementById('btn-export').addEventListener('click', exportTasks);
+
+  document.getElementById('btn-import').addEventListener('click', () => {
+    document.getElementById('import-input').click();
+  });
+
+  document.getElementById('import-input').addEventListener('change', e => {
+    importTasks(e.target.files[0]);
+    e.target.value = ''; // reset so the same file can be re-imported
+  });
 </script>
 </body>
 </html>
