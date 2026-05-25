@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Priority Matrix — 7 Habits</title>
+  <style>
+    :root {
+      --q1:       #ef4444;
+      --q1-bg:    #fff5f5;
+      --q1-dim:   #fca5a5;
+      --q2:       #0ea5e9;
+      --q2-bg:    #f0f9ff;
+      --q2-dim:   #7dd3fc;
+      --q3:       #f59e0b;
+      --q3-bg:    #fffbeb;
+      --q3-dim:   #fcd34d;
+      --q4:       #94a3b8;
+      --q4-bg:    #f8fafc;
+      --q4-dim:   #cbd5e1;
+      --inbox:    #8b5cf6;
+      --inbox-bg: #f5f3ff;
+      --surface:  #ffffff;
+      --bg:       #f1f5f9;
+      --border:   #e2e8f0;
+      --text:     #0f172a;
+      --muted:    #64748b;
+      --faint:    #cbd5e1;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+      padding: 20px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 3px;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 16px;
+      max-width: 1280px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-head h3 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+    }
+
+    .badge {
+      margin-left: auto;
+      background: var(--inbox);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 800;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 99px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Input */
+    .input-body { padding: 12px; }
+    textarea {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font: inherit;
+      font-size: 0.88rem;
+      resize: none;
+      height: 76px;
+      color: var(--text);
+      transition: border-color .15s;
+      display: block;
+    }
+    textarea::placeholder { color: var(--faint); }
+    textarea:focus { outline: none; border-color: var(--inbox); }
+
+    .add-btn {
+      margin-top: 8px;
+      width: 100%;
+      padding: 9px;
+      background: var(--inbox);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+    }
+    .add-btn:hover  { background: #7c3aed; }
+    .add-btn:active { transform: scale(.97); }
+
+    .hint-key {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--faint);
+      margin-top: 6px;
+    }
+
+    /* Inbox */
+    .inbox-body {
+      padding: 10px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .drop-hint {
+      font-size: 0.78rem;
+      color: var(--faint);
+      font-style: italic;
+      text-align: center;
+      padding: 14px 0;
+    }
+
+    /* ── Matrix wrapper ── */
+    .matrix-wrap { display: flex; flex-direction: column; gap: 0; }
+
+    .axis-row {
+      display: grid;
+      grid-template-columns: 22px 1fr 1fr;
+      gap: 8px;
+      padding-bottom: 4px;
+    }
+    .axis-top {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      color: var(--faint);
+      text-align: center;
+    }
+
+    .matrix-body {
+      display: grid;
+      grid-template-columns: 22px 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .axis-side {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--faint);
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Quadrant ── */
+    .quadrant {
+      border-radius: 14px;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .15s, box-shadow .15s, background .15s;
+      position: relative;
+    }
+
+    .q1 { --qc: var(--q1); --qbg: var(--q1-bg); }
+    .q2 { --qc: var(--q2); --qbg: var(--q2-bg); }
+    .q3 { --qc: var(--q3); --qbg: var(--q3-bg); }
+    .q4 { --qc: var(--q4); --qbg: var(--q4-bg); }
+
+    .quadrant::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: var(--qbg);
+      opacity: 0;
+      transition: opacity .15s;
+      pointer-events: none;
+    }
+
+    .quadrant.drag-over {
+      border-color: var(--qc);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--qc) 25%, transparent);
+    }
+    .quadrant.drag-over::after { opacity: 1; }
+
+    .q-head {
+      padding: 12px 12px 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .q-pill {
+      background: var(--qc);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 99px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .q-titles {}
+    .q-name {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .q-desc {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 1px;
+      line-height: 1.4;
+    }
+
+    .q-tasks {
+      padding: 4px 10px 10px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Task card ── */
+    .task {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-left: 3px solid var(--tc, var(--faint));
+      border-radius: 8px;
+      padding: 7px 8px 7px 9px;
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      cursor: grab;
+      font-size: 0.84rem;
+      transition: box-shadow .15s, opacity .15s;
+      user-select: none;
+    }
+
+    /* Inbox tasks */
+    #inbox .task { --tc: var(--inbox); }
+    /* Quadrant tasks */
+    .q1 .task { --tc: var(--q1); }
+    .q2 .task { --tc: var(--q2); }
+    .q3 .task { --tc: var(--q3); }
+    .q4 .task { --tc: var(--q4); }
+
+    .task:hover { box-shadow: 0 2px 10px rgba(0,0,0,.09); }
+    .task.dragging { opacity: .35; cursor: grabbing; }
+
+    .grip {
+      color: var(--faint);
+      font-size: 0.72rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+      line-height: 1.5;
+    }
+
+    .task-text {
+      flex: 1;
+      line-height: 1.45;
+      color: #334155;
+      word-break: break-word;
+    }
+
+    .task-done {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--faint);
+      flex-shrink: 0;
+      transition: color .15s;
+      padding: 0;
+      line-height: 1;
+    }
+    .task-done:hover { color: #22c55e; }
+
+    .task-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--faint);
+      flex-shrink: 0;
+      transition: color .15s;
+      padding: 0;
+      line-height: 1;
+    }
+    .task-del:hover { color: var(--q1); }
+
+    .task.completed .task-text {
+      text-decoration: line-through;
+      color: var(--faint);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 780px) {
+      .layout { grid-template-columns: 1fr; }
+      .matrix-body { grid-template-rows: auto auto; }
+      .quadrant { min-height: 180px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Priority Matrix</h1>
+  <p>7 Habits of Highly Effective People &mdash; Habit 3: Put First Things First</p>
+</header>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+
+    <div class="card">
+      <div class="card-head"><h3>New Task</h3></div>
+      <div class="input-body">
+        <textarea id="task-input" placeholder="What needs to get done?"></textarea>
+        <button class="add-btn" id="add-btn">+ Add to Inbox</button>
+        <p class="hint-key">⌘ Enter to add quickly</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Inbox</h3>
+        <span class="badge" id="inbox-badge">0</span>
+      </div>
+      <div class="inbox-body" id="inbox"
+        ondragover="dragOver(event)"
+        ondragleave="dragLeave(event)"
+        ondrop="drop(event,'inbox')">
+        <p class="drop-hint" id="inbox-hint">Add tasks above &mdash; then drag them into a quadrant</p>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── Matrix ── -->
+  <div class="matrix-wrap">
+
+    <div class="axis-row">
+      <span></span>
+      <span class="axis-top">⚡ Urgent</span>
+      <span class="axis-top">Not Urgent</span>
+    </div>
+
+    <div class="matrix-body">
+
+      <span class="axis-side" style="grid-row:1">Important</span>
+
+      <!-- Q1 -->
+      <div class="quadrant q1"
+        ondragover="dragOver(event)"
+        ondragleave="dragLeave(event)"
+        ondrop="drop(event,'q1')">
+        <div class="q-head">
+          <span class="q-pill">Q1</span>
+          <div class="q-titles">
+            <div class="q-name">Do First</div>
+            <div class="q-desc">Urgent &amp; Important — crises, deadlines, pressing problems</div>
+          </div>
+        </div>
+        <div class="q-tasks" id="q1">
+          <p class="drop-hint">Drop tasks here</p>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="quadrant q2"
+        ondragover="dragOver(event)"
+        ondragleave="dragLeave(event)"
+        ondrop="drop(event,'q2')">
+        <div class="q-head">
+          <span class="q-pill">Q2</span>
+          <div class="q-titles">
+            <div class="q-name">Schedule ★</div>
+            <div class="q-desc">Not Urgent &amp; Important — planning, growth, relationships, prevention</div>
+          </div>
+        </div>
+        <div class="q-tasks" id="q2">
+          <p class="drop-hint">Drop tasks here</p>
+        </div>
+      </div>
+
+      <span class="axis-side" style="grid-row:2">Not Important</span>
+
+      <!-- Q3 -->
+      <div class="quadrant q3"
+        ondragover="dragOver(event)"
+        ondragleave="dragLeave(event)"
+        ondrop="drop(event,'q3')">
+        <div class="q-head">
+          <span class="q-pill">Q3</span>
+          <div class="q-titles">
+            <div class="q-name">Delegate</div>
+            <div class="q-desc">Urgent &amp; Not Important — interruptions, some calls &amp; meetings</div>
+          </div>
+        </div>
+        <div class="q-tasks" id="q3">
+          <p class="drop-hint">Drop tasks here</p>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="quadrant q4"
+        ondragover="dragOver(event)"
+        ondragleave="dragLeave(event)"
+        ondrop="drop(event,'q4')">
+        <div class="q-head">
+          <span class="q-pill">Q4</span>
+          <div class="q-titles">
+            <div class="q-name">Eliminate</div>
+            <div class="q-desc">Not Urgent &amp; Not Important — time wasters, trivial tasks</div>
+          </div>
+        </div>
+        <div class="q-tasks" id="q4">
+          <p class="drop-hint">Drop tasks here</p>
+        </div>
+      </div>
+
+    </div><!-- .matrix-body -->
+  </div><!-- .matrix-wrap -->
+</div><!-- .layout -->
+
+<script>
+  const ZONES = ['inbox','q1','q2','q3','q4'];
+  let taskIdSeq = 0;
+  let dragId = null;
+
+  /* ── helpers ── */
+  function esc(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(str));
+    return d.innerHTML;
+  }
+
+  function zone(id) { return document.getElementById(id); }
+
+  function hint(zoneId) {
+    return zone(zoneId).querySelector('.drop-hint');
+  }
+
+  function sync() {
+    // inbox badge
+    const inboxCount = zone('inbox').querySelectorAll('.task').length;
+    document.getElementById('inbox-badge').textContent = inboxCount;
+
+    // show/hide hints
+    ZONES.forEach(id => {
+      const z = zone(id);
+      const tasks = z.querySelectorAll('.task');
+      const h = hint(id);
+      if (h) h.style.display = tasks.length ? 'none' : '';
+    });
+
+    save();
+  }
+
+  /* ── create card ── */
+  function makeCard(text, id) {
+    const el = document.createElement('div');
+    el.className = 'task';
+    el.draggable = true;
+    el.dataset.id = id;
+    el.innerHTML = `
+      <span class="grip">⠿</span>
+      <span class="task-text">${esc(text)}</span>
+      <button class="task-done" title="Mark complete">✓</button>
+      <button class="task-del"  title="Delete">×</button>
+    `;
+    el.addEventListener('dragstart', onDragStart);
+    el.addEventListener('dragend',   onDragEnd);
+    el.querySelector('.task-done').addEventListener('click', onComplete);
+    el.querySelector('.task-del').addEventListener('click',  onDelete);
+    return el;
+  }
+
+  /* ── add task ── */
+  function addTask() {
+    const inp = document.getElementById('task-input');
+    const text = inp.value.trim();
+    if (!text) { inp.focus(); return; }
+    const id = ++taskIdSeq;
+    zone('inbox').appendChild(makeCard(text, id));
+    inp.value = '';
+    inp.focus();
+    sync();
+  }
+
+  document.getElementById('add-btn').addEventListener('click', addTask);
+  document.getElementById('task-input').addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') addTask();
+  });
+
+  /* ── complete / delete ── */
+  function onComplete(e) {
+    const card = e.currentTarget.closest('.task');
+    card.classList.toggle('completed');
+    save();
+  }
+
+  function onDelete(e) {
+    e.currentTarget.closest('.task').remove();
+    sync();
+  }
+
+  /* ── drag & drop ── */
+  function onDragStart(e) {
+    dragId = this.dataset.id;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dragId);
+  }
+
+  function onDragEnd() {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  }
+
+  function dragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const target = dropTarget(e.currentTarget);
+    if (target) target.classList.add('drag-over');
+  }
+
+  function dragLeave(e) {
+    const target = dropTarget(e.currentTarget);
+    if (target && !target.contains(e.relatedTarget)) {
+      target.classList.remove('drag-over');
+    }
+  }
+
+  function drop(e, zoneId) {
+    e.preventDefault();
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    if (!dragId) return;
+    const card = document.querySelector(`.task[data-id="${dragId}"]`);
+    if (!card) return;
+    const dest = zone(zoneId);
+    if (card.parentElement === dest) return; // same zone, no-op
+    dest.appendChild(card);
+    sync();
+    dragId = null;
+  }
+
+  // Returns the highlightable container element for a drag event target
+  function dropTarget(el) {
+    return el.closest('.quadrant') || el.closest('#inbox') || null;
+  }
+
+  /* ── localStorage persistence ── */
+  function save() {
+    const data = {};
+    ZONES.forEach(id => {
+      data[id] = Array.from(zone(id).querySelectorAll('.task')).map(c => ({
+        id:        parseInt(c.dataset.id, 10),
+        text:      c.querySelector('.task-text').textContent,
+        completed: c.classList.contains('completed'),
+      }));
+    });
+    try { localStorage.setItem('pmx-v1', JSON.stringify(data)); } catch(_) {}
+  }
+
+  function load() {
+    let data;
+    try { data = JSON.parse(localStorage.getItem('pmx-v1')); } catch(_) {}
+    if (!data) return;
+    let maxId = 0;
+    ZONES.forEach(id => {
+      (data[id] || []).forEach(t => {
+        const card = makeCard(t.text, t.id);
+        if (t.completed) card.classList.add('completed');
+        zone(id).appendChild(card);
+        if (t.id > maxId) maxId = t.id;
+      });
+    });
+    taskIdSeq = maxId;
+    sync();
+  }
+
+  load();
+</script>
+</body>
+</html>
