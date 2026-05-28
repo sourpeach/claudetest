@@ -1,0 +1,161 @@
+/* Glassdoor Preview Panel — injected into LinkedIn job pages */
+
+#gd-preview-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999999;
+  width: 290px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.gd-inner {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+/* Header */
+.gd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #0CAA41;
+  color: #fff;
+}
+
+.gd-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+.gd-toggle {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+.gd-toggle:hover { opacity: 1; }
+
+/* Body */
+.gd-body { padding: 12px 14px 14px; }
+
+/* Loading */
+.gd-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9ca3af;
+  font-size: 12px;
+  padding: 6px 0;
+}
+
+.gd-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #0CAA41;
+  border-radius: 50%;
+  animation: gd-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes gd-spin { to { transform: rotate(360deg); } }
+
+/* Company name */
+.gd-company {
+  font-weight: 700;
+  font-size: 14px;
+  color: #111827;
+  margin: 0 0 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Rating row */
+.gd-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.gd-rating-num {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #0CAA41;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.gd-stars { display: flex; gap: 1px; margin-bottom: 2px; }
+.gd-star  { font-size: 14px; }
+.gd-star.full  { color: #0CAA41; }
+.gd-star.half  { color: #6edd9e; }
+.gd-star.empty { color: #d1d5db; }
+
+.gd-review-count {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Stat bars */
+.gd-stat-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 34px;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.gd-stat-label { font-size: 11px; color: #6b7280; }
+.gd-bar-wrap {
+  height: 5px;
+  background: #f3f4f6;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.gd-bar {
+  height: 100%;
+  background: #0CAA41;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+.gd-stat-val { font-size: 11px; font-weight: 600; color: #374151; text-align: right; }
+
+/* Not found */
+.gd-not-found {
+  color: #9ca3af;
+  font-size: 12px;
+  font-style: italic;
+  margin: 0 0 10px;
+}
+
+/* CTA button */
+.gd-btn {
+  display: block;
+  text-align: center;
+  background: #0CAA41;
+  color: #fff !important;
+  text-decoration: none !important;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 12px;
+  transition: background 0.15s;
+}
+.gd-btn:hover { background: #09933a; }
